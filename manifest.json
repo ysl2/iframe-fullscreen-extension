@@ -2,14 +2,19 @@
 {
   "manifest_version": 3,
   "name": "Iframe Fullscreen Button",
-  "version": "1.0",
-  "description": "Adds a fullscreen button to all iframes on a page.",
-  "permissions": [],
+  "version": "2.0",
+  "description": "Adds a fullscreen button to iframes with advanced controls.",
+  "permissions": [
+    "storage"
+  ],
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
       "js": ["content.js"],
       "css": ["styles.css"]
     }
-  ]
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  }
 }

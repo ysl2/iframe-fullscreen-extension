@@ -1,20 +1,19 @@
 
 .fullscreen-button {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  z-index: 9999;
-  background-color: rgba(0, 0, 0, 0.5);
-  color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 8px 12px;
-  cursor: pointer;
-  font-size: 14px;
-  opacity: 0.7;
-  transition: opacity 0.3s ease;
+    position: absolute;
+    z-index: 2147483647; /* Max z-index */
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 14px;
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+    visibility: hidden; /* Controlled by JS */
 }
 
 .fullscreen-button:hover {
-  opacity: 1;
+    opacity: 1;
 }

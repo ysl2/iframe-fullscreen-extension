@@ -1,0 +1,38 @@
+body {
+  font-family: sans-serif;
+  width: 300px;
+  padding: 10px;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+h1 {
+  font-size: 18px;
+  margin: 0;
+  text-align: center;
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+button {
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+#status {
+  text-align: center;
+  color: green;
+}

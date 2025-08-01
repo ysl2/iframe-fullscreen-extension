@@ -3,14 +3,20 @@
 
 <img width=100% alt="" src="assets/README/img/2025-08-01-23-46-52.png" />
 
-A simple yet powerful browser extension that adds a "Fullscreen" button to every iframe on a webpage, making it easy to view embedded content in full-screen mode.
+A powerful browser extension that adds a "Fullscreen" button to iframes on any webpage, with advanced controls to customize its behavior.
 
 ## Features
 
-- **Adds a Fullscreen Button**: Automatically detects all iframes on a page and overlays a clean, non-intrusive fullscreen button on the top-right corner.
-- **Preserves Page Layout**: Intelligently wraps iframes without breaking the original page layout or dimensions.
-- **Handles Dynamic Content**: Uses a `MutationObserver` to detect and handle iframes that are added to the page dynamically after the initial load.
-- **Lightweight and Fast**: Minimal performance impact on your browsing experience.
+- **Universal Fullscreen Button**: Overlays a clean fullscreen button on iframes, allowing you to expand embedded content easily.
+- **Advanced Settings Panel**: Click the extension icon in your browser toolbar to open the settings popup.
+- **Customizable Default Behavior**:
+    - **Default On**: Show the fullscreen button on all websites by default.
+    - **Default Off**: Disable the button by default and only show it on specific sites.
+- **Granular Site Control**:
+    - **Blacklist**: When in "Default On" mode, you can add website URLs (using regular expressions) to a blacklist to prevent the button from appearing on those sites.
+    - **Whitelist**: When in "Default Off" mode, you can add website URLs (using regular expressions) to a whitelist to show the button only on your chosen sites.
+- **Robust and Non-Intrusive**: The button is added without altering the page's layout, preventing common display issues on complex websites.
+- **Handles Dynamic Content**: Uses modern JavaScript observers to detect and handle iframes that are loaded dynamically.
 
 ## Installation
 
@@ -26,7 +32,10 @@ The extension is now installed and active!
 
 ## How to Use
 
-Simply navigate to any webpage that contains an `iframe`. You will see a "Fullscreen" button appear on the top-right of the embedded content. Click it to enter fullscreen mode.
+1.  **Click the extension icon** in your browser toolbar to open the settings.
+2.  **Choose your preferred mode**: "Default On" or "Default Off".
+3.  **Configure your blacklist/whitelist** using regular expressions for precise control (e.g., `https://www.example.com/.*`).
+4.  Navigate to any webpage. The fullscreen button will appear on iframes according to your rules. Click it to enter fullscreen mode.
 
 ---
 

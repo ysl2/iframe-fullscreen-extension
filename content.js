@@ -1,85 +1,128 @@
+let settings = {
+  mode: 'default-on',
+  blacklist: [],
+  whitelist: []
+};
 
-function addFullscreenButton(iframe) {
-    // Prevent re-wrapping by checking if the parent is already a wrapper.
-    if (iframe.parentNode.classList.contains('fullscreen-wrapper')) {
-        return;
+// Map to store iframe-button pairs and their state
+const iframeButtonMap = new Map();
+
+chrome.storage.sync.get(['mode', 'blacklist', 'whitelist'], (result) => {
+  settings.mode = result.mode || 'default-on';
+  settings.blacklist = result.blacklist || [];
+  settings.whitelist = result.whitelist || [];
+  processPage();
+});
+
+function shouldAddButton(url) {
+  if (!url || url === 'about:blank') return false;
+  const { mode, blacklist, whitelist } = settings;
+  try {
+    if (mode === 'default-on') {
+      return !blacklist.some(pattern => new RegExp(pattern).test(url));
+    } else {
+      return whitelist.some(pattern => new RegExp(pattern).test(url));
     }
+  } catch (e) {
+    console.error("Iframe Fullscreen Button: Invalid regex pattern", e);
+    return true;
+  }
+}
 
-    const wrapper = document.createElement('div');
-    wrapper.classList.add('fullscreen-wrapper');
+function createOrUpdateButtonForIframe(iframe) {
+  if (!shouldAddButton(window.location.href)) return;
 
-    // Copy essential layout styles from the iframe to the wrapper.
-    const computedStyle = getComputedStyle(iframe);
-    wrapper.style.display = computedStyle.display === 'inline' ? 'inline-block' : computedStyle.display;
-    wrapper.style.width = computedStyle.width;
-    wrapper.style.height = computedStyle.height;
-    wrapper.style.position = 'relative'; // For the button's positioning.
-
-    // Replace the iframe with the wrapper.
-    iframe.parentNode.replaceChild(wrapper, iframe);
-    // And put the iframe inside the wrapper.
-    wrapper.appendChild(iframe);
-
-    // Reset iframe styles to make it fill the wrapper.
-    iframe.style.position = 'absolute';
-    iframe.style.width = '100%';
-    iframe.style.height = '100%';
-    iframe.style.top = '0';
-    iframe.style.left = '0';
-
-    const button = document.createElement('button');
+  let button;
+  if (iframeButtonMap.has(iframe)) {
+    // Button already exists, just update its position
+    button = iframeButtonMap.get(iframe).button;
+  } else {
+    // Create a new button
+    button = document.createElement('button');
     button.innerText = 'Fullscreen';
     button.className = 'fullscreen-button';
+    document.body.appendChild(button);
+
+    iframeButtonMap.set(iframe, { button, visible: false });
 
     button.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (iframe.requestFullscreen) {
-            iframe.requestFullscreen();
-        } else if (iframe.webkitRequestFullscreen) {
-            iframe.webkitRequestFullscreen();
-        }
+      e.stopPropagation();
+      if (iframe.requestFullscreen) {
+        iframe.requestFullscreen();
+      } else if (iframe.webkitRequestFullscreen) {
+        iframe.webkitRequestFullscreen();
+      }
     });
 
-    wrapper.appendChild(button);
+    // Show/hide logic
+    const show = () => {
+      button.style.visibility = 'visible';
+      button.style.opacity = '0.7';
+    };
+    const hide = () => {
+      // A small delay to allow moving the cursor from iframe to button
+      setTimeout(() => {
+        if (!button.matches(':hover')) {
+          button.style.visibility = 'hidden';
+          button.style.opacity = '0';
+        }
+      }, 100);
+    };
+
+    iframe.addEventListener('mouseenter', show);
+    button.addEventListener('mouseenter', show);
+    iframe.addEventListener('mouseleave', hide);
+    button.addEventListener('mouseleave', hide);
+  }
+
+  // Update position
+  const rect = iframe.getBoundingClientRect();
+  button.style.top = `${rect.top + window.scrollY + 10}px`;
+  button.style.left = `${rect.left + window.scrollX + rect.width - button.offsetWidth - 10}px`;
+}
+
+function updateAllButtonPositions() {
+  for (const iframe of iframeButtonMap.keys()) {
+    // Check if the iframe is still in the DOM
+    if (document.body.contains(iframe)) {
+      createOrUpdateButtonForIframe(iframe);
+    } else {
+      // Clean up if the iframe was removed
+      const { button } = iframeButtonMap.get(iframe);
+      button.remove();
+      iframeButtonMap.delete(iframe);
+    }
+  }
 }
 
 function processAllIframes() {
-    document.querySelectorAll('iframe').forEach(addFullscreenButton);
+  document.querySelectorAll('iframe').forEach(createOrUpdateButtonForIframe);
 }
 
-// Run on initial load.
-processAllIframes();
+function processPage() {
+  processAllIframes();
 
-// Use a MutationObserver to detect iframes added later.
-const observer = new MutationObserver((mutations) => {
-    // Disconnect the observer to prevent it from triggering on its own changes.
-    observer.disconnect();
+  // Periodically update positions to handle scroll, resize, and dynamic changes
+  setInterval(updateAllButtonPositions, 200);
 
-    let newIframesFound = false;
+  const observer = new MutationObserver((mutations) => {
     for (const mutation of mutations) {
-        if (mutation.addedNodes) {
-            mutation.addedNodes.forEach(node => {
-                // Check if the added node is an iframe or contains iframes.
-                if (node.tagName === 'IFRAME' || (node.querySelector && node.querySelector('iframe'))) {
-                    newIframesFound = true;
-                }
-            });
-        }
+      if (mutation.addedNodes) {
+        mutation.addedNodes.forEach(node => {
+          if (node.nodeType === 1) {
+            if (node.tagName === 'IFRAME') {
+              createOrUpdateButtonForIframe(node);
+            } else if (node.querySelectorAll) {
+              node.querySelectorAll('iframe').forEach(createOrUpdateButtonForIframe);
+            }
+          }
+        });
+      }
     }
+  });
 
-    if (newIframesFound) {
-        processAllIframes();
-    }
-
-    // Reconnect the observer.
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true
-    });
-});
-
-// Start observing.
-observer.observe(document.body, {
+  observer.observe(document.body, {
     childList: true,
     subtree: true
-});
+  });
+}
