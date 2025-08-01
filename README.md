@@ -5,6 +5,8 @@
 
 A powerful browser extension that adds a "Fullscreen" button to iframes on any webpage, with advanced controls to customize its behavior.
 
+https://github.com/user-attachments/assets/6aebfbfb-54b2-4839-8b5a-b46340888711
+
 ## Features
 
 - **Universal Fullscreen Button**: Overlays a clean fullscreen button on iframes, allowing you to expand embedded content easily.
