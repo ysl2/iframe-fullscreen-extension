@@ -60,19 +60,25 @@ function createOrUpdateButtonForIframe(iframe) {
       button.style.opacity = '0.7';
     };
     const hide = () => {
-      // A small delay to allow moving the cursor from iframe to button
-      setTimeout(() => {
-        if (!button.matches(':hover')) {
-          button.style.visibility = 'hidden';
-          button.style.opacity = '0';
-        }
-      }, 100);
+      button.style.visibility = 'hidden';
+      button.style.opacity = '0';
     };
 
-    iframe.addEventListener('mouseenter', show);
-    button.addEventListener('mouseenter', show);
-    iframe.addEventListener('mouseleave', hide);
-    button.addEventListener('mouseleave', hide);
+    let timeoutId;
+
+    const handleMouseEnter = () => {
+      clearTimeout(timeoutId);
+      show();
+    };
+
+    const handleMouseLeave = () => {
+      timeoutId = setTimeout(hide, 100);
+    };
+
+    iframe.addEventListener('mouseenter', handleMouseEnter);
+    button.addEventListener('mouseenter', handleMouseEnter);
+    iframe.addEventListener('mouseleave', handleMouseLeave);
+    button.addEventListener('mouseleave', handleMouseLeave);
   }
 
   // Update position
